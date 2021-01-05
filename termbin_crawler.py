@@ -3,40 +3,57 @@ import requests
 import string
 import time
 
-USER_AGENT = [
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:80.0) Gecko/20100101 Firefox/80.0",
-    "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
-    "Mozilla/5.0 (Apple-iPhone7C2/1202.466; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543 Safari/419.3"
-]
 
+def read_ua_file(filename):
+    """ Allow users to add their random User Agent pool to a file. This function will read in the
+    provided file to a list for random_ua() to use."""
+    user_agents = []
+    with open(filename, 'r') as f:
+        content = f.readlines()
+        for line in content:
+            remove_new_line = line[:-1]
+            user_agents.append(remove_new_line)
+    return user_agents
+            
 def random_ua(string):
+    """ Randomize the list of User Agents provided to reduce the likelihood of script detection
+    or ability to block a specific User Agent. For a list of UA's: https://tinyurl.com/y2ry65rw."""
     list_length = len(string)
     agent = random.randrange(list_length)
     return string[agent]
 
+
 def generate_paths(size=4, chars=string.ascii_lowercase + string.digits):
+    """ This function generates the four character alpha numeric string that termbin.com
+    uses to store its content."""
     return ''.join(random.choice(chars) for _ in range(size))
 
+
 def get_link(url):
+    """ Add header data to the request and retrieve server response header. A 200 signifies
+    content exists while a 404 will indicate no link exists."""
+    user_agent_file = read_ua_file('user_agents.txt')
     headers = {
-	    'user-agent': random_ua(USER_AGENT),
+	    'user-agent': random_ua(user_agent_file),
 	    'referer': 'https://google.com',
     }
     r = requests.get(url, headers=headers)
     return r.status_code
     
+
 def create_delay():
     """ Create a list of seconds to use as delays breaking up the crawl rate
-    to help prevent detection as a crawler. """
+    to help prevent detection as a crawler."""
     delay_timing = ['1', '2', '3', '4', '5']
     delay = random.choice(delay_timing)
     return time.sleep(int(delay))
+
 
 def header(msg):
     print("-" * 30)
     print(msg)
     print("-" * 30)
+
 
 def footer(i, r200, r404, end):
     print("-" * 30)
@@ -46,6 +63,7 @@ def footer(i, r200, r404, end):
     print("Scan completed in (seconds): " + str(end))
     print("-" * 30)
 
+
 if __name__ == '__main__':
     start = time.time()
     header("Welcome to Termbin Crawler")
@@ -54,7 +72,7 @@ if __name__ == '__main__':
     response_404 = 0
     scrape_history = []
     print("Initializing scan. Standby....\n")
-    while i < 5:
+    while i < 50:
         path = generate_paths()
         if path in scrape_history:
             print("Path already scraped: " + path)
