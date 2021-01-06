@@ -38,7 +38,8 @@ def get_link(url):
 	    'referer': 'https://google.com',
     }
     r = requests.get(url, headers=headers)
-    return r.status_code
+    #return r.status_code
+    return r
     
 
 def create_delay():
@@ -47,6 +48,12 @@ def create_delay():
     delay_timing = ['1', '2', '3', '4', '5']
     delay = random.choice(delay_timing)
     return time.sleep(int(delay))
+
+
+def save_file(path, url):
+    r = requests.get(url)
+    with open('downloads/' + path, 'wb') as f:
+        f.write(r.content)
 
 
 def header(msg):
@@ -72,15 +79,16 @@ if __name__ == '__main__':
     response_404 = 0
     scrape_history = []
     print("Initializing scan. Standby....\n")
-    while i < 50:
+    while i < 5:
         path = generate_paths()
         if path in scrape_history:
             print("Path already scraped: " + path)
             continue
         else:
             url = str('https://termbin.com/' + path)
-            response_code = get_link(url)
+            response_code = get_link(url).status_code
             if response_code == 200:
+                save_file(path, url)
                 print("\33[32m" + str(response_code) + " - " + url + "\33[0m")
                 response_200 += 1
             elif response_code == 404:

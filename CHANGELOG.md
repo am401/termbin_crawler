@@ -1,4 +1,9 @@
 # Changelog
+## [ 0.0.3 ] 2021-01-05
+### Changed
+- getlink() function's return value just returns r as opposed to r.status_code
+### Added
+- New function save_file() downloads the content for links that return a 200 response code
 ## [ 0.0.2 ] 2021-01-04
 ### Added
 - Function to handle loading User Agents from a text file
