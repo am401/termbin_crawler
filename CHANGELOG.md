@@ -1,9 +1,17 @@
 # Changelog
+## [ 0.0.4 ] 2021-01-06
+### Added
+- Date of scan to filename when downloading content by adding the `today` variable to `save_file()`
+- Error handling if the `user_agents.txt` file is not present
+- Date of the scan to the `footer()` function 
+- `else` statement to `__main__` logic if other than 200 or 404 HTTP resonse code is received
+### Changed
+- Renamed the `get_url()` function to `initiate_request()` to better fit its function
 ## [ 0.0.3 ] 2021-01-05
 ### Changed
-- getlink() function's return value just returns r as opposed to r.status_code
+- `get_link()` function's return value just returns r as opposed to r.status_code
 ### Added
-- New function save_file() downloads the content for links that return a 200 response code
+- New function `save_file()` downloads the content for links that return a 200 response code
 ## [ 0.0.2 ] 2021-01-04
 ### Added
 - Function to handle loading User Agents from a text file

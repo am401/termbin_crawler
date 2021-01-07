@@ -1,6 +1,9 @@
+import datetime
+# import os
 import random
 import requests
 import string
+import sys
 import time
 
 
@@ -8,13 +11,18 @@ def read_ua_file(filename):
     """ Allow users to add their random User Agent pool to a file. This function will read in the
     provided file to a list for random_ua() to use."""
     user_agents = []
-    with open(filename, 'r') as f:
-        content = f.readlines()
-        for line in content:
-            remove_new_line = line[:-1]
-            user_agents.append(remove_new_line)
-    return user_agents
+    try:
+        with open(filename, 'r') as f:
+            content = f.readlines()
+            for line in content:
+                remove_new_line = line[:-1]
+                user_agents.append(remove_new_line)
+        return user_agents
+    except IOError as e:
+        print("Unable to read from the User Agent file: {}".format(e))
+        sys.exit()
             
+
 def random_ua(string):
     """ Randomize the list of User Agents provided to reduce the likelihood of script detection
     or ability to block a specific User Agent. For a list of UA's: https://tinyurl.com/y2ry65rw."""
@@ -29,7 +37,7 @@ def generate_paths(size=4, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def get_link(url):
+def initiate_request(url):
     """ Add header data to the request and retrieve server response header. A 200 signifies
     content exists while a 404 will indicate no link exists."""
     user_agent_file = read_ua_file('user_agents.txt')
@@ -50,9 +58,18 @@ def create_delay():
     return time.sleep(int(delay))
 
 
-def save_file(path, url):
-    r = requests.get(url)
-    with open('downloads/' + path, 'wb') as f:
+#def create_directory_for_saving_files(date_format):
+#    try:
+#        os.mkdir(date_format)
+#    except OSError as e:
+#        print("Unable to create the directory: {}".format(e))
+#        sys.exit()
+
+
+def save_file(filename, url):
+    today = str(datetime.date.today())
+    r = initiate_request(url)
+    with open('downloads/' + today + '-' + filename, 'wb') as f:
         f.write(r.content)
 
 
@@ -64,6 +81,7 @@ def header(msg):
 
 def footer(i, r200, r404, end):
     print("-" * 30)
+    print("Scan completed on:           " + str(datetime.date.today()))
     print("Total scans completed:       " + str(i))
     print("Nunber of 200 links found:   " + str(r200)) 
     print("Nunber of 404 links found:   " + str(r404)) 
@@ -72,21 +90,21 @@ def footer(i, r200, r404, end):
 
 
 if __name__ == '__main__':
-    start = time.time()
+    start_time = datetime.datetime.now()
     header("Welcome to Termbin Crawler")
     i = 0
     response_200 = 0
     response_404 = 0
     scrape_history = []
     print("Initializing scan. Standby....\n")
-    while i < 5:
+    while i < 500:
         path = generate_paths()
         if path in scrape_history:
             print("Path already scraped: " + path)
             continue
         else:
             url = str('https://termbin.com/' + path)
-            response_code = get_link(url).status_code
+            response_code = initiate_request(url).status_code
             if response_code == 200:
                 save_file(path, url)
                 print("\33[32m" + str(response_code) + " - " + url + "\33[0m")
@@ -94,11 +112,15 @@ if __name__ == '__main__':
             elif response_code == 404:
                 print("\33[31m" + str(response_code) + " - " + url + "\33[0m")
                 response_404 += 1
+            else:
+                print("Unable to handle the following request due to unexpected\
+                      response code")
+                print("\33[33" + str(ressponse_code) + " - " + url + "\33[0m")
  
         scrape_history.append(path)
 
         create_delay()
 
         i += 1
-    end = (time.time() - start)
-    footer(i, response_200, response_404, end)
+    end_time = (datetime.datetime.now() - start_time)
+    footer(i, response_200, response_404, end_time)
