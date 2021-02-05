@@ -1,4 +1,9 @@
 # Changelog
+## [ 0.0.4 ] 2021-02-04
+### Changed
+- Text of skipping path when found in history
+### Added
+- `timeout=5` to the request call
 ## [ 0.0.4 ] 2021-01-06
 ### Added
 - Date of scan to filename when downloading content by adding the `today` variable to `save_file()`

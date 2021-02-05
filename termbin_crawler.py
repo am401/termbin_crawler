@@ -1,5 +1,4 @@
 import datetime
-# import os
 import random
 import requests
 import string
@@ -45,8 +44,7 @@ def initiate_request(url):
 	    'user-agent': random_ua(user_agent_file),
 	    'referer': 'https://google.com',
     }
-    r = requests.get(url, headers=headers)
-    #return r.status_code
+    r = requests.get(url, headers=headers, timeout=5)
     return r
     
 
@@ -56,14 +54,6 @@ def create_delay():
     delay_timing = ['1', '2', '3', '4', '5']
     delay = random.choice(delay_timing)
     return time.sleep(int(delay))
-
-
-#def create_directory_for_saving_files(date_format):
-#    try:
-#        os.mkdir(date_format)
-#    except OSError as e:
-#        print("Unable to create the directory: {}".format(e))
-#        sys.exit()
 
 
 def save_file(filename, url):
@@ -100,7 +90,7 @@ if __name__ == '__main__':
     while i < 500:
         path = generate_paths()
         if path in scrape_history:
-            print("Path already scraped: " + path)
+            print("Skipping, already scraped: " + path)
             continue
         else:
             url = str('https://termbin.com/' + path)
