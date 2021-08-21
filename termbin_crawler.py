@@ -1,4 +1,5 @@
 import datetime
+import os
 import random
 import requests
 import string
@@ -80,6 +81,15 @@ def footer(i, r200, r404, end):
 
 
 if __name__ == '__main__':
+    """ The script currently requires the downloads directory to be present
+        as well as the user_agents.txt file. Check for these and exit if they
+        are not present. """
+    if not os.path.isdir('downloads'):
+        print("The 'downloads' directory does not exist. Please create it and re-run this script.")
+        sys.exit()
+    if not os.path.isfile('user_agents.txt'):
+        print("The 'user_agents.txt' file does not exist. Please create it and re-run this script.")
+        sys.exit()
     start_time = datetime.datetime.now()
     header("Welcome to Termbin Crawler")
     i = 0
@@ -87,7 +97,7 @@ if __name__ == '__main__':
     response_404 = 0
     scrape_history = []
     print("Initializing scan. Standby....\n")
-    while i < 500:
+    while i < 5:
         path = generate_paths()
         if path in scrape_history:
             print("Skipping, already scraped: " + path)
