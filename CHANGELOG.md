@@ -2,6 +2,7 @@
 ## [ 0.0.5 ] 2021-08-21
 ### Added
 - Checks to ensure `user_agents.txt` and the `downloads` directory exist before running the script
+- Iteration counter, especially for when a high number of links are being checked
 
 ## [ 0.0.4 ] 2021-02-04
 ### Changed

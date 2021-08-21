@@ -107,10 +107,10 @@ if __name__ == '__main__':
             response_code = initiate_request(url).status_code
             if response_code == 200:
                 save_file(path, url)
-                print("\33[32m" + str(response_code) + " - " + url + "\33[0m")
+                print(str(i) + ">> \33[32m" + str(response_code) + " - " + url + "\33[0m")
                 response_200 += 1
             elif response_code == 404:
-                print("\33[31m" + str(response_code) + " - " + url + "\33[0m")
+                print(str(i) + ">> \33[31m" + str(response_code) + " - " + url + "\33[0m")
                 response_404 += 1
             else:
                 print("Unable to handle the following request due to unexpected\
