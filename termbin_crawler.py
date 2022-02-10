@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import os
 import random
@@ -5,6 +6,19 @@ import requests
 import string
 import sys
 import time
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='TermbinCrawler, locate and save data from termbin.com')
+    parser.add_argument('-c', '--count', nargs='?', const=100, type=int, help='Define the number of URL paths to try')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Print verbose crawl output to screen')
+    args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit()
+    else:
+        return args
 
 
 def read_ua_file(filename):
@@ -84,6 +98,9 @@ if __name__ == '__main__':
     """ The script currently requires the downloads directory to be present
         as well as the user_agents.txt file. Check for these and exit if they
         are not present. """
+    args = parse_args()
+    number_of_records = args.count
+
     if not os.path.isdir('downloads'):
         print("The 'downloads' directory does not exist. Please create it and re-run this script.")
         sys.exit()
@@ -93,34 +110,54 @@ if __name__ == '__main__':
     start_time = datetime.datetime.now()
     header("Welcome to Termbin Crawler")
     i = 0
+    x = 1
     response_200 = 0
     response_404 = 0
     scrape_history = []
     print("Initializing scan. Standby....\n")
-    while i < 5:
-        path = generate_paths()
-        if path in scrape_history:
-            print("Skipping, already scraped: " + path)
-            continue
-        else:
-            url = str('https://termbin.com/' + path)
-            response_code = initiate_request(url).status_code
-            if response_code == 200:
-                save_file(path, url)
-                print(str(i) + ">> \33[32m" + str(response_code) + " - " + url + "\33[0m")
-                response_200 += 1
-            elif response_code == 404:
-                print(str(i) + ">> \33[31m" + str(response_code) + " - " + url + "\33[0m")
-                response_404 += 1
+    if args.verbose:
+        while i < number_of_records:
+            path = generate_paths()
+            if path in scrape_history:
+                print("Skipping, already scraped: " + path)
+                continue
             else:
-                print("Unable to handle the following request due to unexpected\
-                      response code")
-                print("\33[33" + str(ressponse_code) + " - " + url + "\33[0m")
- 
-        scrape_history.append(path)
+                url = str('https://termbin.com/' + path)
+                response_code = initiate_request(url).status_code
+                if response_code == 200:
+                    save_file(path, url)
+                    print(str(x) + ">> \33[32m" + str(response_code) + " - " + url + "\33[0m")
+                    response_200 += 1
+                elif response_code == 404:
+                    print(str(x) + ">> \33[31m" + str(response_code) + " - " + url + "\33[0m")
+                    response_404 += 1
+                else:
+                    print("Unable to handle the following request due to unexpected\
+                          response code")
+                    print("\33[33" + str(ressponse_code) + " - " + url + "\33[0m")
+     
+            scrape_history.append(path)
 
-        create_delay()
+            create_delay()
 
-        i += 1
+            i += 1
+            x += 1
+    else:
+        while i < number_of_records:
+            path = generate_paths()
+            if path in scrape_history:
+                continue
+            else:
+                url = str('https://termbin.com/' + path)
+                response_code = initiate_request(url).status_code
+                if response_code == 200:
+                    save_file(path, url)
+                    response_200 += 1
+                elif response_code == 404:
+                    response_404 += 1
+            scrape_history.append(path)
+            create_delay()
+            i += 1
+
     end_time = (datetime.datetime.now() - start_time)
     footer(i, response_200, response_404, end_time)
