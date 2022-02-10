@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import json
 import os
 import random
 import requests
@@ -66,7 +67,7 @@ def initiate_request(url):
 def create_delay():
     """ Create a list of seconds to use as delays breaking up the crawl rate
     to help prevent detection as a crawler."""
-    delay_timing = ['1', '2', '3', '4', '5']
+    delay_timing = ['1', '2', '3']
     delay = random.choice(delay_timing)
     return time.sleep(int(delay))
 
@@ -114,50 +115,47 @@ if __name__ == '__main__':
     response_200 = 0
     response_404 = 0
     scrape_history = []
+    data = '{}'
     print("Initializing scan. Standby....\n")
-    if args.verbose:
-        while i < number_of_records:
-            path = generate_paths()
-            if path in scrape_history:
-                print("Skipping, already scraped: " + path)
-                continue
-            else:
-                url = str('https://termbin.com/' + path)
-                response_code = initiate_request(url).status_code
-                if response_code == 200:
-                    save_file(path, url)
+    while i < number_of_records:
+        path = generate_paths()
+        if path in scrape_history:
+            print("Skipping, already scraped: " + path)
+            continue
+        else:
+            url = str('https://termbin.com/' + path)
+            response_code = initiate_request(url).status_code
+            if response_code == 200:
+    #            save_file(path, url)
+                json_data = json.loads(data)
+                value = initiate_request(url).content
+                to_save = { path  : value }
+                json_data.update(to_save)
+
+                response_200 += 1
+                if args.verbose:
                     print(str(x) + ">> \33[32m" + str(response_code) + " - " + url + "\33[0m")
-                    response_200 += 1
-                elif response_code == 404:
+            elif response_code == 404:
+                response_404 += 1
+                if args.verbose:
                     print(str(x) + ">> \33[31m" + str(response_code) + " - " + url + "\33[0m")
-                    response_404 += 1
-                else:
+            else:
+                if args.verbose:
                     print("Unable to handle the following request due to unexpected\
                           response code")
                     print("\33[33" + str(ressponse_code) + " - " + url + "\33[0m")
-     
-            scrape_history.append(path)
+ 
+        scrape_history.append(path)
 
-            create_delay()
+        create_delay()
 
-            i += 1
-            x += 1
-    else:
-        while i < number_of_records:
-            path = generate_paths()
-            if path in scrape_history:
-                continue
-            else:
-                url = str('https://termbin.com/' + path)
-                response_code = initiate_request(url).status_code
-                if response_code == 200:
-                    save_file(path, url)
-                    response_200 += 1
-                elif response_code == 404:
-                    response_404 += 1
-            scrape_history.append(path)
-            create_delay()
-            i += 1
+        i += 1
+        x += 1
 
+    #print(json.dumps(data))
+    json_object = json.dumps(json_data)
+    print(json_object)
+    with open('result.json', 'w') as f:
+        write(json_object)
     end_time = (datetime.datetime.now() - start_time)
     footer(i, response_200, response_404, end_time)
